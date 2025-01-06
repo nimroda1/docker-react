@@ -15,8 +15,8 @@ before_install:
       echo 'Dependencies installed successfully!' &&
       tail -f /dev/null"  # This keeps the container alive
 
-  # Wait for the container to be ready before running further commands
-  - docker exec container sh -c "while ! ps aux | grep -q 'ruby'; do sleep 1; done"
+  # Give the container some time to initialize (10 seconds)
+  - sleep 10
 
   # Install nokogiri gem inside the Docker container
   - docker exec container gem install nokogiri --platform=ruby
