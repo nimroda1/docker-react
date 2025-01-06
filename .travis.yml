@@ -12,7 +12,8 @@ before_install:
   - docker run -d --name container nimroda/docker-react bash -c "
       apk update && 
       apk add --no-cache bash libxml2-dev libxslt-dev zlib-dev libressl-dev ruby ruby-dev build-base && 
-      echo 'Dependencies installed successfully!'"
+      echo 'Dependencies installed successfully!' &&
+      tail -f /dev/null"  # This keeps the container alive
 
   # Wait for the container to be ready before running further commands
   - docker exec container sh -c "while ! ps aux | grep -q 'ruby'; do sleep 1; done"
