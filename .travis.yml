@@ -8,17 +8,17 @@ before_install:
   # Build the Docker image
   - docker build -t nimroda/docker-react -f Dockerfile.dev .
   
-  # Start the container in detached mode
+  # Start the container in detached mode with a long-running process to keep it alive
   - docker run -d --name container nimroda/docker-react bash -c "
       apk update && 
       apk add --no-cache bash libxml2-dev libxslt-dev zlib-dev libressl-dev ruby ruby-dev build-base && 
       echo 'Dependencies installed successfully!' && 
-      tail -f /dev/null"  # Use a long-running sleep to ensure the container stays alive
-
+      tail -f /dev/null"  # Ensure the container stays alive indefinitely
+  
   # Give the container some time to initialize (10 seconds)
   - sleep 10
 
-  # Force Nokogiri to install from source
+  # Install Nokogiri (force ruby platform installation)
   - docker exec container gem install nokogiri --platform=ruby || (echo "Nokogiri installation failed!" && exit 1)
 
 script:
