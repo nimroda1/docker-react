@@ -1,10 +1,11 @@
-# Use the official Node.js image as a base image
-FROM node:16-buster
+# Use an Ubuntu-based image for more recent glibc
+FROM ubuntu:20.04
 
-# Set working directory
-WORKDIR /app
+# Set environment variables to avoid tzdata interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
 
-# Install dependencies for Nokogiri and Ruby 3.1+ (including build tools)
+# Install dependencies (Ruby, Node.js, etc.)
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg2 \
@@ -14,25 +15,40 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libssl-dev \
     bash \
-    && apt-get remove -y ruby ruby-dev \
-    && apt-get install -y gnupg2 \
-    # Import the necessary public GPG keys for RVM
-    && curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
-    && curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import - \
-    # Install Ruby 3.1+ via RVM binary (faster and saves space)
-    && curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.0 \
-    # Clean up apt cache
-    && rm -rf /var/lib/apt/lists/*
+    ruby-full \
+    tzdata \
+    ca-certificates \
+    software-properties-common && \
+    apt-get clean
 
-# Install dependencies for the React app
-COPY package.json /app/package.json
+# Install Node.js (this will also install npm)
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean
+
+# Install Yarn (optional, if you're using Yarn for package management)
+# RUN npm install -g yarn
+
+# Import the necessary public GPG keys for RVM
+RUN curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
+    && curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -
+
+# Install RVM and Ruby 3.1.0
+RUN curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.0
+
+# Explicitly use bash to source the RVM script
+RUN bash -c "source /usr/local/rvm/scripts/rvm && rvm use 3.1.0 --default"
+
+# Set working directory for the app
+WORKDIR /app
+
+# Install dependencies (for React)
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the React app files
-COPY . /app
+# Copy application files
+COPY . .
 
-# Expose port 3000
+# Expose port and set the command to run the React app
 EXPOSE 3000
-
-# Run the React app
 CMD ["npm", "run", "start"]
