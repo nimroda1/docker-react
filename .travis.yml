@@ -11,7 +11,7 @@ before_install:
   # Start the container in detached mode
   - docker run -d --name container nimroda/docker-react bash -c "
       apt-get update && 
-      apt-get install -y bash libxml2-dev libxslt-dev zlib1g-dev libssl-dev ruby ruby-dev build-essential && 
+      apt-get install -y bash libxml2-dev libxslt-dev zlib1g-dev libssl-dev ruby3.1 ruby3.1-dev build-essential && 
       echo 'Dependencies installed successfully!' && 
       while true; do sleep 3600; done"  # Use an infinite loop to keep the container alive
 
