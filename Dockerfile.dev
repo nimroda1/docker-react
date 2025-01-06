@@ -1,27 +1,38 @@
-FROM node:lts-alpine
+# Use the official Node.js image as a base image
+FROM node:16-buster
 
-# Install Ruby, build tools, and dependencies for Nokogiri
-RUN apk update && apk add --no-cache \
-    ruby \
-    ruby-dev \
-    build-base \
+# Set working directory
+WORKDIR /app
+
+# Install dependencies for Nokogiri and Ruby 3.1+ (including build tools)
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg2 \
+    build-essential \
     libxml2-dev \
     libxslt-dev \
-    zlib-dev \
-    libressl-dev \
-    bash
+    zlib1g-dev \
+    libssl-dev \
+    bash \
+    && apt-get remove -y ruby ruby-dev \
+    && apt-get install -y gnupg2 \
+    # Import the necessary public GPG keys for RVM
+    && curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
+    && curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import - \
+    # Install Ruby 3.1+ via RVM binary (faster and saves space)
+    && curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.0 \
+    # Clean up apt cache
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR '/app'
-
-# Copy the package.json and install dependencies
-COPY package.json ./
+# Install dependencies for the React app
+COPY package.json /app/package.json
 RUN npm install
 
-# Copy the rest of your app's code
-COPY . ./
+# Copy the rest of the React app files
+COPY . /app
 
-# Install Nokogiri gem
-RUN gem install nokogiri --platform=ruby
+# Expose port 3000
+EXPOSE 3000
 
-# Start the app with npm
+# Run the React app
 CMD ["npm", "run", "start"]
