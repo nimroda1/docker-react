@@ -8,27 +8,14 @@ before_install:
   # Build the Docker image
   - docker build -t nimroda/docker-react -f Dockerfile.dev .
   
-  # Install glibc 2.28 inside the Docker container
+  # Install required packages inside the Docker container
   - docker run -d --name container nimroda/docker-react bash -c "
-      apt-get update && 
-      apt-get install -y build-essential wget && 
-      wget http://ftp.gnu.org/gnu/libc/glibc-2.28.tar.gz && 
-      tar -xvzf glibc-2.28.tar.gz && 
-      cd glibc-2.28 && 
-      mkdir build && 
-      cd build && 
-      ../configure --prefix=/opt/glibc-2.28 && 
-      make -j$(nproc) && 
-      sudo make install && 
-      export LD_LIBRARY_PATH=/opt/glibc-2.28/lib:$LD_LIBRARY_PATH && 
-      exit"
+      apk update && 
+      apk add --no-cache bash libxml2-dev libxslt-dev zlib-dev libressl-dev ruby ruby-dev build-base && 
+      echo 'Dependencies installed successfully!'"
 
-  # Debugging: Check for the availability of apt-get and installed libraries
-  - docker run --rm nimroda/docker-react bash -c "
-    apt-get update && 
-    apt-get install -y libxml2-dev libxslt-dev zlib1g-dev libssl-dev && 
-    echo 'Dependencies installed successfully!' && 
-    gem install nokogiri --platform=ruby || (echo 'Failed to install Nokogiri!' && exit 1)" 
+  # Install nokogiri gem inside the Docker container
+  - docker exec container gem install nokogiri --platform=ruby
 
 script:
   - docker run -e CI=true nimroda/docker-react npm run test
