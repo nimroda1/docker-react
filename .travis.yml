@@ -13,7 +13,10 @@ before_install:
       apk update && 
       apk add --no-cache bash libxml2-dev libxslt-dev zlib-dev libressl-dev ruby ruby-dev build-base && 
       echo 'Dependencies installed successfully!' &&
-      tail -f /dev/null"  # This keeps the container alive
+      sleep 3600"  # Use a long-running sleep to ensure the container stays alive
+
+  # Check if the container is running
+  - docker ps -a  # This should show the container as "Up"
 
   # Give the container some time to initialize (10 seconds)
   - sleep 10
