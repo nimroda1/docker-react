@@ -15,19 +15,22 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libssl-dev \
     bash \
-    ruby-full \
     tzdata \
     ca-certificates \
-    software-properties-common && \
+    software-properties-common \
+    libreadline-dev \
+    libncurses5-dev \
+    libffi-dev \
+    libgdbm-dev \
+    libdb-dev \
+    libbz2-dev \
+    liblzma-dev && \
     apt-get clean
 
 # Install Node.js (this will also install npm)
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get install -y nodejs && \
     apt-get clean
-
-# Install Yarn (optional, if you're using Yarn for package management)
-# RUN npm install -g yarn
 
 # Import the necessary public GPG keys for RVM
 RUN curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
@@ -36,7 +39,11 @@ RUN curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
 # Install RVM and Ruby 3.1.0
 RUN curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.0
 
-# Explicitly use bash to source the RVM script
+# Set environment variables to source rvm on shell startup
+ENV PATH="/usr/local/rvm/rubies/ruby-3.1.0/bin:/usr/local/rvm/bin:${PATH}"
+ENV RUBY_VERSION=3.1.0
+
+# Set the default Ruby version
 RUN bash -c "source /usr/local/rvm/scripts/rvm && rvm use 3.1.0 --default"
 
 # Set working directory for the app
