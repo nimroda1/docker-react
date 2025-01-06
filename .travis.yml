@@ -23,8 +23,10 @@ before_install:
       export LD_LIBRARY_PATH=/opt/glibc-2.28/lib:$LD_LIBRARY_PATH && 
       exit"
 
-  # Install Nokogiri with the Ruby platform option (to avoid glibc version mismatch)
+  # Ensure Nokogiri installs correctly by adding the necessary build dependencies
   - docker run --rm nimroda/docker-react bash -c "
+      apt-get update && 
+      apt-get install -y libxml2-dev libxslt-dev zlib1g-dev libssl-dev && 
       gem install nokogiri --platform=ruby"
 
 script:
