@@ -27,11 +27,18 @@ before_install:
   # Check again if the container is still running
   - docker ps -a  # This will show the status of the container
 
+  # Verify Ruby version is 3.1.0
+  - docker exec container ruby -v  # Should show Ruby 3.1.0
+
+  # Check if Nokogiri is installed (or try to install it)
+  - docker exec container gem list nokogiri || (echo "Nokogiri gem not found, installing..." && docker exec container gem install nokogiri --platform=ruby)
+
   # Install Nokogiri in the running container
   - docker exec container gem install nokogiri --platform=ruby || (echo "Nokogiri installation failed!" && exit 1)
 
 script:
-  - docker run -e CI=true nimroda/docker-react npm run test
+  # Run tests inside the container, ensuring CI=true is set
+  - docker exec -e CI=true container npm run test
 
 deploy:
   provider: elasticbeanstalk
