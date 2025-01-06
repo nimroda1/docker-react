@@ -1,10 +1,27 @@
 FROM node:lts-alpine
 
+# Install Ruby, build tools, and dependencies for Nokogiri
+RUN apk update && apk add --no-cache \
+    ruby \
+    ruby-dev \
+    build-base \
+    libxml2-dev \
+    libxslt-dev \
+    zlib-dev \
+    libressl-dev \
+    bash
+
 WORKDIR '/app'
 
-COPY package.json .
+# Copy the package.json and install dependencies
+COPY package.json ./
 RUN npm install
 
-COPY . .
+# Copy the rest of your app's code
+COPY . ./
 
+# Install Nokogiri gem
+RUN gem install nokogiri --platform=ruby
+
+# Start the app with npm
 CMD ["npm", "run", "start"]
