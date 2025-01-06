@@ -21,8 +21,14 @@ before_install:
   # Give the container some time to initialize (10 seconds)
   - sleep 10
 
-  # Install nokogiri gem inside the Docker container
-  - docker exec container gem install nokogiri --platform=ruby
+  # Check if the container is running
+  - docker ps -a  # This will show the status of the container
+
+  # Check logs if the container is not running
+  - docker logs container || echo "Failed to retrieve logs"  # Get container logs if it failed
+
+  # If the container is running, proceed with the gem installation
+  - docker exec container gem install nokogiri --platform=ruby || (echo "Nokogiri installation failed!" && exit 1)
 
 script:
   - docker run -e CI=true nimroda/docker-react npm run test
