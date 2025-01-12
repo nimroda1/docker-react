@@ -1,61 +1,12 @@
-# Use an Ubuntu-based image for more recent glibc
-FROM ubuntu:20.04
+FROM node:16
 
-# Set environment variables to avoid tzdata interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
+WORKDIR '/app'
 
-# Install dependencies (Ruby, Node.js, etc.)
-RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg2 \
-    build-essential \
-    libxml2-dev \
-    libxslt-dev \
-    zlib1g-dev \
-    libssl-dev \
-    bash \
-    tzdata \
-    ca-certificates \
-    software-properties-common \
-    libreadline-dev \
-    libncurses5-dev \
-    libffi-dev \
-    libgdbm-dev \
-    libdb-dev \
-    libbz2-dev \
-    liblzma-dev && \
-    apt-get clean
-
-# Install Node.js (this will also install npm)
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get install -y nodejs && \
-    apt-get clean
-
-# Import the necessary public GPG keys for RVM
-RUN curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
-    && curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -
-
-# Install RVM and Ruby 3.1.0
-RUN curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.0
-
-# Set environment variables to source rvm on shell startup
-ENV PATH="/usr/local/rvm/rubies/ruby-3.1.0/bin:/usr/local/rvm/bin:${PATH}"
-ENV RUBY_VERSION=3.1.0
-
-# Set the default Ruby version
-RUN bash -c "source /usr/local/rvm/scripts/rvm && rvm use 3.1.0 --default"
-
-# Set working directory for the app
-WORKDIR /app
-
-# Install dependencies (for React)
-COPY package*.json ./
+COPY package.json .
 RUN npm install
 
-# Copy application files
 COPY . .
 
-# Expose port and set the command to run the React app
 EXPOSE 3000
+
 CMD ["npm", "run", "start"]
