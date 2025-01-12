@@ -11,7 +11,7 @@ before_install:
 script:
   - docker run -d --name docker-react-container nimroda/docker-react
 # Run tests inside the container, ensuring CI=true is set
-  - docker run -d --name docker-react-container nimroda/docker-react
+  - docker exec -e CI=true docker-react-container npm run test
 
 deploy:
   provider: elasticbeanstalk
